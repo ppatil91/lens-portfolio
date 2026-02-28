@@ -1,5 +1,11 @@
 # 📸 Lens - Photographer Portfolio & Community
 
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white)
+
 A beautiful, full-stack web application built for photographers to showcase their work, track their performance, and connect with other creators. 
 
 *Built with Flask, TailwindCSS, Chart.js, and Flask-SocketIO (for that sweet instant messaging).*
@@ -36,14 +42,45 @@ A beautiful, full-stack web application built for photographers to showcase thei
 - **Backend**: Python, Flask, Flask-SQLAlchemy (SQLite)
 - **Real-Time Engine**: Flask-SocketIO, Eventlet
 - **Frontend**: HTML5, Jinja2, Vanilla JavaScript
-- **Styling**: TailwindCSS (via CDN for raw speed) & Phosphor Icons
+- **Styling**: TailwindCSS & Phosphor Icons
 - **Image Processing**: Pillow & Pillow_HEIF
 
 ---
 
-## 💻 How to Run Locally
+## � Project Structure
+
+```text
+lens-portfolio/
+│
+├── instance/               # SQLite Database
+├── static/                 # CSS, JS, and static assets
+│   ├── css/                # Tailwind input and generated output
+│   └── uploads/            # User-uploaded photos and avatars
+├── templates/              # HTML Templates (Jinja2)
+│   ├── base.html           # Main Layout
+│   ├── index.html          # Landing Page
+│   ├── dashboard.html      # Analytics & User Dashboard
+│   ├── portfolio.html      # User Profile & Portfolio Grid
+│   ├── chat.html           # Real-Time Messaging Interface
+│   └── explore.html        # Discover Trending Photos
+│
+├── models.py               # SQLAlchemy Database Models (User, Photo, Comment, Message)
+├── run.py                  # Main Flask Application & Socket.IO Events
+├── config.py               # Application Config variables
+└── requirements.txt        # Python Dependencies
+```
+
+---
+
+## �💻 How to Run Locally
 
 Want to spin this up on your own machine? It's super easy.
+
+### Prerequisites
+- Python 3.8+
+- Git
+
+### Installation
 
 1. **Clone the repo**
    ```bash
@@ -54,7 +91,7 @@ Want to spin this up on your own machine? It's super easy.
 2. **Create a virtual environment (Optional but Recommended)**
    ```bash
    python3 -m venv venv
-   source venv/bin/activate
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
    ```
 
 3. **Install Dependencies**
@@ -62,14 +99,22 @@ Want to spin this up on your own machine? It's super easy.
    pip install -r requirements.txt
    ```
 
-4. **Run the Magic!**
+4. **Initialize Tailwind CSS (Optional)**
+   *If you want to modify styles.*
+   ```bash
+   npm install
+   npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch
+   ```
+
+5. **Run the Magic!**
    ```bash
    # We use SocketIO, so the standard flask run won't give you real-time features.
    # Run the python file directly!
    python3 run.py
    ```
 
-5. Go to `http://localhost:5000` in your browser and start exploring!
+6. **View the App**
+   Go to `http://localhost:5000` in your browser and start exploring!
 
 ---
 
