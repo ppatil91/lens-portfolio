@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LENS - Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brandBase: '#0f0f0f',
+                        brandCard: '#1a1a1a',
+                        brandAccent: '#DDAA77',
+                        brandAccentHover: '#cda06d',
+                        brandBorder: '#232323',
+                        brandInput: '#232323'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+        }
+
+        .form-container {
+            transition: all 0.5s ease-in-out;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .form-hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+            position: absolute;
+            visibility: hidden;
+        }
+
+        .auth-bg {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 1) 0%, rgba(15, 15, 15, 1) 100%);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen font-sans antialiased overflow-hidden">
+
+    <!-- Left Side: Image -->
+    <div class="hidden lg:block lg:w-1/2 relative">
+        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=2000&auto=format&fit=crop"
+            alt="Photography equipment" class="w-full h-full object-cover grayscale opacity-70">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent to-brandBase"></div>
+        <div class="absolute bottom-12 left-12 max-w-md">
+            <h2 class="text-3xl font-bold mb-4">"Photography takes an instant out of time, altering life by holding it
+                still."</h2>
+            <p class="text-gray-400">— Dorothea Lange</p>
+        </div>
+        <a href="{{ url_for('index') }}"
+            class="absolute top-8 left-8 flex items-center text-white/50 hover:text-white transition-colors bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+            <i class="ph ph-arrow-left mr-2"></i> Back to Home
+        </a>
+    </div>
+
+    <!-- Right Side: Forms -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 relative overflow-hidden auth-bg">
+
+        <a href="{{ url_for('index') }}"
+            class="lg:hidden absolute top-8 left-8 flex items-center text-gray-400 hover:text-white transition-colors">
+            <i class="ph ph-arrow-left mr-2"></i> Home
+        </a>
+
+        <!-- Alert messages -->
+        <div class="absolute top-8 right-8 left-8 lg:left-0 text-center z-50">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div
+                class="inline-flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium {% if category == 'error' %}bg-red-500/10 text-red-500 border border-red-500/20{% else %}bg-green-500/10 text-green-500 border border-green-500/20{% endif %} mb-2 shadow-lg backdrop-blur-sm">
+                <i
+                    class="ph-fill {% if category == 'error' %}ph-warning-circle{% else %}ph-check-circle{% endif %} text-lg"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" class="w-full max-w-md form-container">
+            <div class="flex items-center gap-2 mb-8 justify-center">
+                <i class="ph ph-camera text-brandAccent text-4xl"></i>
+                <span class="text-3xl font-bold tracking-widest uppercase">Lens</span>
+            </div>
+
+            <h1 class="text-2xl font-bold mb-2">Welcome back</h1>
+            <p class="text-gray-400 text-sm mb-8">Enter your details to access your portfolio.</p>
+
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-5">
+                <input type="hidden" name="action" value="login">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <div class="relative">
+                        <i
+                            class="ph ph-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"></i>
+                        <input type="email" name="email" required placeholder="you@example.com"
+                            class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <i
+                            class="ph ph-lock-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"></i>
+                        <input type="password" name="password" required placeholder="••••••••"
+                            class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mt-2">
+                    <label class="flex items-center">
+                        <input type="checkbox"
+                            class="w-4 h-4 rounded border-gray-600 bg-brandInput text-brandAccent focus:ring-brandAccent focus:ring-offset-brandBase rounded">
+                        <span class="ml-2 text-sm text-gray-400">Remember me</span>
+                    </label>
+                    <a href="#"
+                        class="text-sm text-brandAccent hover:text-brandAccentHover transition-colors font-medium">Forgot
+                        password?</a>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-brandAccent hover:bg-brandAccentHover text-brandBase font-bold py-3 rounded-lg shadow-[0_0_15px_rgba(221,170,119,0.2)] hover:shadow-[0_0_20px_rgba(221,170,119,0.3)] transition-all transform hover:-translate-y-0.5 mt-4">
+                    Sign In
+                </button>
+            </form>
+
+            <p class="mt-8 text-center text-sm text-gray-400">
+                Don't have an account?
+                <button type="button" onclick="toggleForms()"
+                    class="text-white font-medium hover:text-brandAccent transition-colors">Create one</button>
+            </p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="w-full max-w-md form-hidden">
+            <div class="flex items-center gap-2 mb-8 justify-center">
+                <i class="ph ph-camera text-brandAccent text-4xl"></i>
+                <span class="text-3xl font-bold tracking-widest uppercase">Lens</span>
+            </div>
+
+            <h1 class="text-2xl font-bold mb-2">Create your account</h1>
+            <p class="text-gray-400 text-sm mb-8">Join the community of visual artists.</p>
+
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-5">
+                <input type="hidden" name="action" value="register">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                    <div class="relative">
+                        <i
+                            class="ph ph-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"></i>
+                        <input type="text" name="full_name" required placeholder="John Doe"
+                            class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <div class="relative">
+                        <i
+                            class="ph ph-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"></i>
+                        <input type="email" name="email" required placeholder="you@example.com"
+                            class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <i
+                            class="ph ph-lock-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg"></i>
+                        <input type="password" name="password" required placeholder="••••••••" minlength="6"
+                            class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-12 pr-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-white hover:bg-gray-200 text-brandBase font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 mt-6">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="mt-8 text-center text-sm text-gray-400">
+                Already have an account?
+                <button type="button" onclick="toggleForms()"
+                    class="text-white font-medium hover:text-brandAccent transition-colors">Sign in</button>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function toggleForms() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+
+            if (loginForm.classList.contains('form-hidden')) {
+                // Show Login
+                loginForm.classList.remove('form-hidden');
+                setTimeout(() => {
+                    loginForm.style.position = 'relative';
+                    loginForm.style.visibility = 'visible';
+                }, 50);
+
+                // Hide Register
+                registerForm.style.position = 'absolute';
+                registerForm.style.visibility = 'hidden';
+                registerForm.classList.add('form-hidden');
+
+                // Update URL parameter without reload
+                window.history.replaceState({}, '', window.location.pathname);
+            } else {
+                // Show Register
+                registerForm.classList.remove('form-hidden');
+                setTimeout(() => {
+                    registerForm.style.position = 'relative';
+                    registerForm.style.visibility = 'visible';
+                }, 50);
+
+                // Hide Login
+                loginForm.style.position = 'absolute';
+                loginForm.style.visibility = 'hidden';
+                loginForm.classList.add('form-hidden');
+
+                // Update URL parameter without reload
+                window.history.replaceState({}, '', window.location.pathname + '?signup=true');
+            }
+        }
+
+        // Check for signup parameter on initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('signup')) {
+                const loginForm = document.getElementById('login-form');
+                const registerForm = document.getElementById('register-form');
+
+                loginForm.style.position = 'absolute';
+                loginForm.style.visibility = 'hidden';
+                loginForm.classList.add('form-hidden');
+
+                registerForm.classList.remove('form-hidden');
+                registerForm.style.position = 'relative';
+                registerForm.style.visibility = 'visible';
+            }
+        });
+    </script>
+</body>
+
+</html>

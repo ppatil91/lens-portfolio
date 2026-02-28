@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LENS - Upload Photo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brandBase: '#0f0f0f',
+                        brandSidebar: '#141414',
+                        brandCard: '#1a1a1a',
+                        brandAccent: '#DDAA77',
+                        brandAccentHover: '#cda06d',
+                        brandBorder: '#232323',
+                        brandInput: '#232323'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+        }
+
+        /* Custom scrollbar for textareas if needed */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #232323;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen font-sans antialiased overflow-hidden">
+
+    <!-- Alert messages -->
+    <div class="fixed top-8 right-8 z-50">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div
+            class="inline-flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium {% if category == 'error' %}bg-red-500/10 text-red-500 border border-red-500/20{% else %}bg-green-500/10 text-green-500 border border-green-500/20{% endif %} mb-2 shadow-lg backdrop-blur-sm">
+            <i
+                class="ph-fill {% if category == 'error' %}ph-warning-circle{% else %}ph-check-circle{% endif %} text-lg"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <aside class="w-64 bg-brandSidebar border-r border-brandBorder flex flex-col justify-between shrink-0">
+        <div>
+            <div class="h-20 flex items-center px-8 border-b border-brandBorder/50">
+                <i class="ph ph-camera text-brandAccent text-2xl mr-3"></i>
+                <a href="{{ url_for('index') }}"><span
+                        class="text-xl font-bold tracking-widest uppercase text-white hover:text-brandAccent transition-colors">Lens</span></a>
+            </div>
+            <div class="px-4 mt-6">
+                <form action="{{ url_for('search') }}" method="GET" class="relative">
+                    <i
+                        class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" name="q" placeholder="Find photographers..." required
+                        class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-500">
+                </form>
+            </div>
+
+            <nav class="mt-6 px-4 space-y-2">
+                <a href="{{ url_for('feed') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-house text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Home Feed</span>
+                </a>
+
+                <a href="{{ url_for('explore') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-compass text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Explore</span>
+                </a>
+
+                <a href="{{ url_for('dashboard') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-squares-four text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+
+                <a href="{{ url_for('upload') }}"
+                    class="flex items-center px-4 py-3 bg-[#261e16] text-brandAccent rounded-lg transition-colors">
+                    <i class="ph ph-upload-simple text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Upload</span>
+                </a>
+
+                <a href="{{ url_for('portfolio', user_id=current_user.id) }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-image text-xl mr-3"></i>
+                    <span class="text-sm font-medium">My Portfolio</span>
+                </a>
+
+                <a href="{{ url_for('settings') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-gear text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-brandBorder/50">
+            <div class="flex items-center px-4 mb-4">
+                <div class="w-8 h-8 rounded-full bg-gray-700 overflow-hidden mr-3">
+                    {% if current_user.profile_image == 'default_profile.jpg' %}
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+                        class="w-full h-full object-cover">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + current_user.profile_image) }}"
+                        class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                <div class="truncate">
+                    <p class="text-sm font-medium text-white truncate">{{ current_user.full_name }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ current_user.email }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}"
+                class="flex items-center px-4 py-2 text-gray-400 hover:text-red-400 transition-colors">
+                <i class="ph ph-sign-out text-lg mr-3"></i>
+                <span class="text-sm font-medium">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto bg-brandBase p-10">
+
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-8">
+                <a href="{{ url_for('dashboard') }}"
+                    class="text-gray-400 text-sm flex items-center hover:text-white w-max mb-4 transition-colors">
+                    <i class="ph ph-arrow-left mr-2"></i> Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-bold mb-2 flex items-center">
+                    <i class="ph ph-camera text-brandAccent mr-3"></i> Upload Photo
+                </h1>
+                <p class="text-gray-400 text-sm">Share your latest work with the world</p>
+            </div>
+
+            <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+                <div class="bg-brandCard border border-brandBorder rounded-xl p-8 mb-8 shadow-lg">
+                    <h2 class="text-lg font-bold mb-4">Photo</h2>
+
+                    <div class="relative border-2 border-dashed border-[#333] hover:border-brandAccent transition-colors rounded-xl p-12 flex flex-col items-center justify-center text-center bg-[#141414] cursor-pointer group overflow-hidden"
+                        id="drop-zone">
+                        <input type="file" name="photo" id="photo-upload"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required
+                            accept=".png, .jpg, .jpeg, .gif, .webp">
+
+                        <div id="upload-content" class="flex flex-col items-center pointer-events-none">
+                            <i
+                                class="ph ph-upload-simple text-4xl text-gray-500 group-hover:text-brandAccent mb-4 transition-colors"></i>
+                            <p class="text-white font-medium mb-1">Drag and drop your photo here</p>
+                            <p class="text-gray-500 text-sm mb-6">or click to browse</p>
+                            <span
+                                class="bg-[#2a231b] text-brandAccent group-hover:bg-brandAccent group-hover:text-[#0f0f0f] px-6 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Select File
+                            </span>
+                        </div>
+
+                        <div id="preview-content" class="hidden absolute inset-0 z-0 bg-black">
+                            <img id="image-preview" src="#" alt="Preview" class="w-full h-full object-contain">
+                            <div
+                                class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span
+                                    class="bg-black/80 text-white px-4 py-2 rounded-lg backdrop-blur-sm shadow-lg text-sm font-medium border border-white/20">Click
+                                    to change photo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-brandCard border border-brandBorder rounded-xl p-8 mb-8 shadow-lg">
+                    <h2 class="text-lg font-bold mb-6">Photo Details</h2>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Title <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="title" required placeholder="Enter photo title"
+                                class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg px-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Category <span
+                                    class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select name="category" required
+                                    class="w-full bg-brandInput border border-transparent text-sm text-gray-400 rounded-lg px-4 py-3 appearance-none focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all">
+                                    <option value="" disabled selected>Select a category</option>
+                                    <option value="landscape">Landscape</option>
+                                    <option value="portrait">Portrait</option>
+                                    <option value="architecture">Architecture</option>
+                                    <option value="street">Street</option>
+                                    <option value="nature">Nature</option>
+                                    <option value="wildlife">Wildlife</option>
+                                    <option value="abstract">Abstract</option>
+                                </select>
+                                <i
+                                    class="ph ph-caret-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                            <textarea name="description" rows="4" placeholder="Describe your photo..."
+                                class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg px-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600 resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                            <input type="text" name="location" placeholder="Where was this taken?"
+                                class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg px-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Tags</label>
+                            <input type="text" name="tags" placeholder="nature, landscape, mountains (comma separated)"
+                                class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg px-4 py-3 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-600 mb-2">
+                            <p class="text-xs text-gray-500">Separate tags with commas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="submit"
+                        class="flex-1 bg-brandAccent hover:bg-brandAccentHover text-[#0f0f0f] font-semibold py-3.5 rounded-lg transition-colors">
+                        Upload Photo
+                    </button>
+                    <a href="{{ url_for('dashboard') }}"
+                        class="flex-1 bg-white hover:bg-gray-200 text-black font-semibold py-3.5 rounded-lg transition-colors text-center inline-block">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('photo-upload');
+        const uploadContent = document.getElementById('upload-content');
+        const previewContent = document.getElementById('preview-content');
+        const imagePreview = document.getElementById('image-preview');
+
+        fileInput.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    uploadContent.classList.add('hidden');
+                    previewContent.classList.remove('hidden');
+                }
+
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    </script>
+</body>
+
+</html>

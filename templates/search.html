@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LENS - Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { brandBase: '#0f0f0f', brandSidebar: '#141414', brandCard: '#1a1a1a', brandAccent: '#DDAA77', brandBorder: '#232323', brandInput: '#232323' } } }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen font-sans antialiased overflow-hidden">
+
+    <!-- Include the standard sidebar -->
+    <aside
+        class="w-64 bg-brandSidebar border-r border-brandBorder flex flex-col justify-between hidden md:flex shrink-0">
+        <div>
+            <div class="h-20 flex items-center px-8 border-b border-brandBorder/50">
+                <i class="ph ph-camera text-brandAccent text-2xl mr-3"></i>
+                <a href="{{ url_for('index') }}"><span
+                        class="text-xl font-bold tracking-widest uppercase text-white hover:text-brandAccent transition-colors">Lens</span></a>
+            </div>
+
+            <div class="px-4 mt-6">
+                <form action="{{ url_for('search') }}" method="GET" class="relative">
+                    <i
+                        class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" name="q" value="{{ query }}" placeholder="Find photographers..." required
+                        class="w-full bg-brandInput border border-transparent text-sm text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:border-brandAccent focus:ring-1 focus:ring-brandAccent transition-all placeholder-gray-500">
+                </form>
+            </div>
+
+            <nav class="mt-6 px-4 space-y-2">
+                <a href="{{ url_for('feed') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-house text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Home Feed</span>
+                </a>
+
+                <a href="{{ url_for('explore') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-compass text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Explore</span>
+                </a>
+
+                <a href="{{ url_for('dashboard') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-squares-four text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+
+                <a href="{{ url_for('upload') }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-upload-simple text-xl mr-3"></i>
+                    <span class="text-sm font-medium">Upload</span>
+                </a>
+                <a href="{{ url_for('portfolio', user_id=current_user.id) }}"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <i class="ph ph-image text-xl mr-3"></i>
+                    <span class="text-sm font-medium">My Portfolio</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-brandBorder/50">
+            <div class="flex items-center px-4 mb-4">
+                <div class="w-8 h-8 rounded-full bg-gray-700 overflow-hidden mr-3">
+                    {% if current_user.profile_image == 'default_profile.jpg' %}
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+                        class="w-full h-full object-cover">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/' + current_user.profile_image) }}"
+                        class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                <div class="truncate">
+                    <p class="text-sm font-medium text-white truncate">{{ current_user.full_name }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ current_user.email }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}"
+                class="flex items-center px-4 py-2 text-gray-400 hover:text-red-400 transition-colors">
+                <i class="ph ph-sign-out text-lg mr-3"></i>
+                <span class="text-sm font-medium">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto bg-brandBase p-10">
+        <header class="mb-10">
+            <h1 class="text-3xl font-bold mb-2">Search Results</h1>
+            <p class="text-gray-400 text-sm">Showing results for "<span class="text-white font-medium">{{ query
+                    }}</span>"</p>
+        </header>
+
+        {% if users %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for user in users %}
+            <div
+                class="bg-brandCard border border-brandBorder rounded-xl p-6 flex items-center justify-between shadow-lg">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-gray-700 overflow-hidden shrink-0">
+                        {% if user.profile_image == 'default_profile.jpg' %}
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+                            class="w-full h-full object-cover">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}"
+                            class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white">{{ user.full_name }}</h3>
+                        <p class="text-xs text-gray-400">{{ user.photos.count() if user.photos is string else
+                            user.photos|length }} Photos</p>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('portfolio', user_id=user.id) }}"
+                    class="bg-brandInput hover:bg-brandAccent hover:text-[#0f0f0f] border border-brandBorder px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    View
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div
+            class="bg-brandCard border border-brandBorder rounded-xl p-16 flex flex-col items-center justify-center text-center shadow-lg">
+            <i class="ph ph-user-focus text-gray-600 text-6xl mb-4"></i>
+            <h3 class="text-lg font-bold mb-2">No photographers found</h3>
+            <p class="text-gray-400 text-sm">Try searching for a different name.</p>
+        </div>
+        {% endif %}
+    </main>
+</body>
+
+</html>

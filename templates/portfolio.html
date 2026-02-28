@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LENS - {{ user.full_name }}'s Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brandBase: '#0f0f0f',
+                        brandCard: '#1a1a1a',
+                        brandAccent: '#DDAA77',
+                        brandBorder: '#232323',
+                        brandInput: '#232323'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+        }
+
+        /* --- CUSTOM ANIMATIONS --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .animate-slide-up {
+            opacity: 0;
+            /* starts hidden */
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Staggered Delay Utilities */
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+
+        .delay-300 {
+            animation-delay: 300ms;
+        }
+
+        .delay-400 {
+            animation-delay: 400ms;
+        }
+
+        .delay-500 {
+            animation-delay: 500ms;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased min-h-screen">
+
+    <div class="absolute top-6 left-6 z-50 flex gap-4">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}"
+            class="flex items-center bg-black/40 hover:bg-black/80 backdrop-blur-md px-4 py-2 rounded-full text-sm font-medium transition-colors border border-white/10">
+            <i class="ph ph-squares-four mr-2"></i> Dashboard
+        </a>
+        {% else %}
+        <a href="{{ url_for('index') }}"
+            class="flex items-center bg-black/40 hover:bg-black/80 backdrop-blur-md px-4 py-2 rounded-full text-sm font-medium transition-colors border border-white/10">
+            <i class="ph ph-house mr-2"></i> Home
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="relative w-full h-80 lg:h-96">
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"
+            alt="Cover Banner" class="w-full h-full object-cover">
+
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brandBase/40 to-brandBase"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 relative -mt-24 mb-16 z-10">
+        <div
+            class="flex flex-col md:flex-row justify-between items-end md:items-center gap-6 animate-slide-up delay-100">
+
+            <div class="flex flex-col items-center md:items-start gap-6">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-32 h-32 rounded-full border-4 border-brandBase overflow-hidden bg-brandCard shadow-2xl shrink-0">
+                        {% if user.profile_image == 'default_profile.jpg' %}
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
+                            class="w-full h-full object-cover">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}"
+                            class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="mb-2">
+                        <h1 class="text-3xl font-bold mb-1">{{ user.full_name }}</h1>
+                        <p class="text-gray-400 text-sm">{{ user.bio or 'Passionate photographer capturing moments.' }}
+                        </p>
+                        <div class="flex gap-4 mt-3">
+                            <a href="#" class="text-gray-500 hover:text-white transition-colors"><i
+                                    class="ph ph-instagram-logo text-lg"></i></a>
+                            <a href="#" class="text-gray-500 hover:text-white transition-colors"><i
+                                    class="ph ph-twitter-logo text-lg"></i></a>
+                            <a href="#" class="text-gray-500 hover:text-white transition-colors"><i
+                                    class="ph ph-globe text-lg"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                {% if current_user.is_authenticated and current_user != user %}
+                <div class="mt-2 text-center md:text-left">
+                    {% if current_user.is_connected_to(user) %}
+                    <a href="{{ url_for('disconnect_user', user_id=user.id) }}"
+                        class="text-xs font-semibold bg-transparent border border-gray-500 text-white px-6 py-2 rounded-full hover:bg-red-500 hover:border-red-500 transition-colors inline-block">
+                        Connected
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('connect_user', user_id=user.id) }}"
+                        class="text-xs font-semibold bg-brandAccent text-[#0f0f0f] px-6 py-2 rounded-full hover:bg-brandAccentHover transition-colors inline-block">
+                        Connect
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('chat', user_id=user.id) }}"
+                        class="text-xs font-semibold bg-[#232323] text-white px-6 py-2 rounded-full hover:bg-brandBorder transition-colors inline-block ml-2">
+                        <i class="ph ph-chat-circle-text mr-1"></i> Message
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="flex gap-8 mb-2">
+                <div class="text-center">
+                    <p class="text-3xl font-bold">{{ photos|length }}</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Photos</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold">{{ views }}</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Views</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold">{{ likes }}</p>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Likes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-6 pb-20 animate-fade-in delay-200">
+
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold animate-slide-up delay-300">Portfolio</h2>
+
+            <div class="relative">
+                <select
+                    class="bg-brandInput border border-brandBorder text-sm text-gray-300 rounded-lg pl-4 pr-10 py-2.5 appearance-none focus:outline-none focus:border-brandAccent transition-colors">
+                    <option value="all">All Categories</option>
+                    <option value="landscape">Landscape</option>
+                    <option value="portrait">Portrait</option>
+                    <option value="architecture">Architecture</option>
+                </select>
+                <i
+                    class="ph ph-caret-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+            </div>
+        </div>
+
+        {% if photos %}
+        <div class="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
+            {% for photo in photos %}
+            <a href="{{ url_for('view_photo', photo_id=photo.id) }}"
+                class="break-inside-avoid group relative rounded-xl overflow-hidden cursor-pointer bg-brandCard block border border-transparent hover:border-brandAccent transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-2xl animate-slide-up delay-{{ loop.index0 * 100 % 500 + 100 }}">
+                <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}"
+                    class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                    alt="{{ photo.title }}">
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+                    <h3 class="text-lg font-bold text-white mb-1">{{ photo.title }}</h3>
+                    <div class="flex justify-between items-center text-sm text-gray-300">
+                        <span>{{ photo.category|title }}</span>
+                        <span class="flex items-center"><i class="ph-fill ph-heart text-brandAccent mr-1"></i> {{
+                            photo.likes }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="py-20 text-center">
+            <i class="ph ph-image-square text-gray-600 text-6xl mb-4"></i>
+            <h3 class="text-lg font-bold mb-2">No photos yet</h3>
+            <p class="text-gray-400 text-sm">This portfolio is currently empty.</p>
+        </div>
+        {% endif %}
+    </main>
+
+</body>
+
+</html>
